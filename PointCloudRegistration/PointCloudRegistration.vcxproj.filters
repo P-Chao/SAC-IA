@@ -35,9 +35,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="common.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="filters.h">
       <Filter>Header Files</Filter>
     </ClInclude>

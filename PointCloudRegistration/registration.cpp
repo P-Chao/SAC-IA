@@ -23,16 +23,36 @@
 
 using namespace pcl;
 
-Eigen::Matrix4f icpNonLinear(PointCloud<PointNormal>::Ptr src, PointCloud<PointNormal>::Ptr tgt){
+class MyPointRepresentation : public pcl::PointRepresentation <PointNormal> //继承关系
+{
+	using pcl::PointRepresentation<PointNormal>::nr_dimensions_;
+public:
+	MyPointRepresentation() {
+		nr_dimensions_ = 4; // dimention
+	}
+
+	//重载函数copyToFloatArray，以定义自己的特征向量
+	virtual void copyToFloatArray(const PointNormal &p, float * out) const {
+		//< x, y, z, curvature > 坐标xyz和曲率
+		out[0] = p.x;
+		out[1] = p.y;
+		out[2] = p.z;
+		out[3] = p.curvature;
+	}
+};
+
+Eigen::Matrix4f icpNonLinear(PointCloud<PointNormal>::Ptr src, PointCloud<PointNormal>::Ptr tgt,
+	int max_iteration, double max_correspondence_distance, double eps){
 
 	pcl::IterativeClosestPointNonLinear<PointNormal, PointNormal> reg;
-	reg.setTransformationEpsilon(1e-6);
+	reg.setTransformationEpsilon(eps);
 
-	reg.setMaxCorrespondenceDistance(0.1);
-	//reg.setPointRepresentation();
+	reg.setMaxCorrespondenceDistance(max_correspondence_distance);
+	MyPointRepresentation point_representation;
+	reg.setPointRepresentation(boost::make_shared<const MyPointRepresentation>(point_representation));
 	reg.setInputCloud(src);
 	reg.setInputTarget(tgt);
-	reg.setMaximumIterations(2);
+	reg.setMaximumIterations(max_iteration);
 
 	Eigen::Matrix4f Ti = Eigen::Matrix4f::Identity(), prev;
 	PointCloud<PointNormal>::Ptr reg_result = src;

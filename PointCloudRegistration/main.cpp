@@ -23,6 +23,7 @@
 
 #include "filters.h"
 #include "features.h"
+#include "registration.h"
 #include "sac_ia.h"
 #include "visualization.h"
 
@@ -46,8 +47,8 @@ int main(int argc, char *argv[]){
 	pcl::PointCloud<pcl::PointXYZ>::Ptr cloud1(new pcl::PointCloud<pcl::PointXYZ>);
 	pcl::PointCloud<pcl::PointXYZ>::Ptr cloud2(new pcl::PointCloud<pcl::PointXYZ>);
 	
-	pcl::io::loadPCDFile("pcd/a3.pcd", *cloud1);
-	pcl::io::loadPCDFile("pcd/a4.pcd", *cloud2);
+	pcl::io::loadPCDFile("pcd/a1.pcd", *cloud1);
+	pcl::io::loadPCDFile("pcd/a2.pcd", *cloud2);
 
 	// downsample the clouds
 	pcl::PointCloud<pcl::PointXYZ>::Ptr cloud1ds(new pcl::PointCloud<pcl::PointXYZ>);
@@ -87,8 +88,8 @@ int main(int argc, char *argv[]){
 	pcl::PointCloud<pcl::PointXYZ>::Ptr src(new pcl::PointCloud<pcl::PointXYZ>);
 	pcl::PointCloud<pcl::PointXYZ>::Ptr tgt(new pcl::PointCloud<pcl::PointXYZ>);
 
-	src = cloud1ds;
-	tgt = cloud2ds;
+	src = cloud1;
+	tgt = cloud2;
 
 	// compute normals
 	pcl::PointCloud<pcl::PointNormal>::Ptr points_with_normals_src = getPointNormals(src, 30);
@@ -96,7 +97,11 @@ int main(int argc, char *argv[]){
 
 	// ICP + LM (Non Linear ICP)
 	pcl::IterativeClosestPointNonLinear<pcl::PointNormal, pcl::PointNormal> reg;
-	
+	Eigen::Matrix4f Ti = icpNonLinear(points_with_normals_src, points_with_normals_tgt, 2, 1, 1);
+	Eigen::Matrix4f Tiv = Ti.inverse();
+	cout << Tiv << endl;
+	pcl::transformPointCloud(*tgt, *src, Tiv);
+	viewPair(cloud1, cloud2, src, tgt);
 
 	return 0;
 }

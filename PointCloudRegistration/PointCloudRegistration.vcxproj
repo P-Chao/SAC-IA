@@ -149,7 +149,6 @@
     <ClCompile Include="visualization.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="common.hpp" />
     <ClInclude Include="features.h" />
     <ClInclude Include="filters.h" />
     <ClInclude Include="registration.h" />
