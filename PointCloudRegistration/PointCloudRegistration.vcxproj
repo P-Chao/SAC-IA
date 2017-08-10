@@ -144,6 +144,7 @@
     <ClCompile Include="features.cpp" />
     <ClCompile Include="filters.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="registration.cpp" />
     <ClCompile Include="sac_ia.cpp" />
     <ClCompile Include="visualization.cpp" />
   </ItemGroup>
@@ -151,6 +152,7 @@
     <ClInclude Include="common.hpp" />
     <ClInclude Include="features.h" />
     <ClInclude Include="filters.h" />
+    <ClInclude Include="registration.h" />
     <ClInclude Include="sac_ia.h" />
     <ClInclude Include="visualization.h" />
   </ItemGroup>

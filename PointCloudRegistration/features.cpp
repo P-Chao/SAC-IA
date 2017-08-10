@@ -45,3 +45,16 @@ PointCloud<Normal>::Ptr getNormals(PointCloud<PointXYZ>::Ptr incloud, double nor
 	norm_est.compute(*normalsPtr);
 	return normalsPtr;
 }
+
+PointCloud<PointNormal>::Ptr getPointNormals(PointCloud<PointXYZ>::Ptr incloud, int k){
+
+	PointCloud<PointNormal>::Ptr points_with_normals = PointCloud<PointNormal>::Ptr(new PointCloud<PointNormal>);
+	NormalEstimation<PointXYZ, PointNormal> norm_est;
+	pcl::search::KdTree<pcl::PointXYZ>::Ptr tree(new pcl::search::KdTree<pcl::PointXYZ>());
+	norm_est.setSearchMethod(tree);
+	norm_est.setKSearch(k);
+	norm_est.setInputCloud(incloud);
+	norm_est.compute(*points_with_normals);
+	pcl::copyPointCloud(*incloud, *points_with_normals);
+	return points_with_normals;
+}

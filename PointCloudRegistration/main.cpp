@@ -3,6 +3,7 @@
 #include <pcl/io/pcd_io.h>
 #include <pcl/point_types.h>
 #include <pcl/registration/icp.h>
+#include <pcl/registration/icp_nl.h>
 #include <pcl/registration/ia_ransac.h>
 #include <pcl/point_types.h>
 #include <pcl/features/normal_3d.h>
@@ -76,8 +77,26 @@ int main(int argc, char *argv[]){
 	cout << "done. Time elapsed: " << time(NULL) - starttime << " seconds\n";
 	cout.flush();
 
-	viewPair(cloud1ds, cloud2ds, cloud1, cloud2);
 	pcl::io::savePCDFile("result.pcd", final);
+	viewPair(cloud1ds, cloud2ds, cloud1, cloud2);
 	//view(final);
+
+	// copy source data
+	pcl::transformPointCloud(*cloud2ds, *cloud2ds, init_transform);
+
+	pcl::PointCloud<pcl::PointXYZ>::Ptr src(new pcl::PointCloud<pcl::PointXYZ>);
+	pcl::PointCloud<pcl::PointXYZ>::Ptr tgt(new pcl::PointCloud<pcl::PointXYZ>);
+
+	src = cloud1ds;
+	tgt = cloud2ds;
+
+	// compute normals
+	pcl::PointCloud<pcl::PointNormal>::Ptr points_with_normals_src = getPointNormals(src, 30);
+	pcl::PointCloud<pcl::PointNormal>::Ptr points_with_normals_tgt = getPointNormals(tgt, 30);
+
+	// ICP + LM (Non Linear ICP)
+	pcl::IterativeClosestPointNonLinear<pcl::PointNormal, pcl::PointNormal> reg;
+	
+
 	return 0;
 }
