@@ -39,6 +39,15 @@ const double SAC_MAX_CORRESPONDENCE_DIST = 1000; // 2000
 const double SAC_MIN_CORRESPONDENCE_DIST = 3;
 
 int main(int argc, char *argv[]){
+	string filename1, filename2;
+	if (argc == 3){
+		filename1 = argv[1];
+		filename2 = argv[2];
+	} else{
+		filename1 = "pcd/a3.pcd";
+		filename2 = "pcd/a4.pcd";
+	}
+
 	time_t starttime = time(NULL);
 	cout << "Loading clouds...\n";
 	cout.flush();
@@ -47,8 +56,8 @@ int main(int argc, char *argv[]){
 	pcl::PointCloud<pcl::PointXYZ>::Ptr cloud1(new pcl::PointCloud<pcl::PointXYZ>);
 	pcl::PointCloud<pcl::PointXYZ>::Ptr cloud2(new pcl::PointCloud<pcl::PointXYZ>);
 	
-	pcl::io::loadPCDFile("pcd/a3.pcd", *cloud1);
-	pcl::io::loadPCDFile("pcd/a4.pcd", *cloud2);
+	pcl::io::loadPCDFile(filename1, *cloud1);
+	pcl::io::loadPCDFile(filename2, *cloud2);
 
 	// downsample the clouds
 	pcl::PointCloud<pcl::PointXYZ>::Ptr cloud1ds(new pcl::PointCloud<pcl::PointXYZ>);
