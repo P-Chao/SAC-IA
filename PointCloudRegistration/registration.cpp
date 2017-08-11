@@ -64,7 +64,7 @@ Eigen::Matrix4f icpNonLinear(PointCloud<PointNormal>::Ptr src, PointCloud<PointN
 		Ti = reg.getFinalTransformation() * Ti;
 		if (fabs((reg.getLastIncrementalTransformation() - prev).sum()) 
 			< reg.getTransformationEpsilon()){
-			reg.setMaxCorrespondenceDistance(reg.getMaxCorrespondenceDistance() - 0.001);
+			reg.setMaxCorrespondenceDistance(reg.getMaxCorrespondenceDistance() - 0.01);
 		}
 		prev = reg.getLastIncrementalTransformation();
 	}

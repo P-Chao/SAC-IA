@@ -30,12 +30,12 @@
 using namespace std;
 
 const double FILTER_LIMIT = 1000.0;
-const int MAX_SACIA_ITERATIONS = 2000;
+const int MAX_SACIA_ITERATIONS = 1000; // 2000
 
 const float VOXEL_GRID_SIZE = 3;
 const double NORMALS_RADIUS = 20;
-const double FEATURES_RADIUS = 50;
-const double SAC_MAX_CORRESPONDENCE_DIST = 2000;
+const double FEATURES_RADIUS = 50; // 50
+const double SAC_MAX_CORRESPONDENCE_DIST = 1000; // 2000
 const double SAC_MIN_CORRESPONDENCE_DIST = 3;
 
 int main(int argc, char *argv[]){
@@ -97,7 +97,7 @@ int main(int argc, char *argv[]){
 
 	// ICP + LM (Non Linear ICP)
 	pcl::IterativeClosestPointNonLinear<pcl::PointNormal, pcl::PointNormal> reg;
-	Eigen::Matrix4f Ti = icpNonLinear(points_with_normals_src, points_with_normals_tgt, 2, 1, 1);
+	Eigen::Matrix4f Ti = icpNonLinear(points_with_normals_src, points_with_normals_tgt, 2, 2, 0.1);
 	Eigen::Matrix4f Tiv = Ti.inverse();
 	cout << Tiv << endl;
 	pcl::transformPointCloud(*tgt, *src, Tiv);
