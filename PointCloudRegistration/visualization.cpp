@@ -58,3 +58,23 @@ void viewPair(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud1, pcl::PointCloud<pcl::P
 	return;
 }
 
+PointCloud<pcl::PointXYZRGB>::Ptr coloredMerge(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud1, pcl::PointCloud<pcl::PointXYZ>::Ptr cloud2){
+
+	PointCloud<pcl::PointXYZRGB>::Ptr cloud1color(new pcl::PointCloud<pcl::PointXYZRGB>);
+	PointCloud<pcl::PointXYZRGB>::Ptr cloud2color(new pcl::PointCloud<pcl::PointXYZRGB>);
+	pcl::copyPointCloud(*cloud1, *cloud1color);
+	pcl::copyPointCloud(*cloud2, *cloud2color);
+	for (size_t i = 0; i < cloud1color->points.size(); ++i){
+		cloud1color->points[i].r = 255;
+		cloud1color->points[i].g = 0;
+		cloud1color->points[i].b = 0;
+	}
+	for (size_t i = 0; i < cloud2color->points.size(); ++i){
+		cloud2color->points[i].r = 0;
+		cloud2color->points[i].g = 0;
+		cloud2color->points[i].b = 255;
+	}
+	*cloud1color += *cloud2color;
+	return cloud1color;
+}
+

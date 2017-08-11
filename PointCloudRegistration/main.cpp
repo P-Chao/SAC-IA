@@ -81,6 +81,8 @@ int main(int argc, char *argv[]){
 	pcl::io::savePCDFile("result.pcd", final);
 	viewPair(cloud1ds, cloud2ds, cloud1, cloud2);
 	//view(final);
+	pcl::PointCloud<pcl::PointXYZRGB>::Ptr output = coloredMerge(cloud1, cloud2);
+	pcl::io::savePCDFile("output.pcd", *output);
 
 	// copy source data
 	pcl::transformPointCloud(*cloud2ds, *cloud2ds, init_transform);
@@ -101,7 +103,9 @@ int main(int argc, char *argv[]){
 	Eigen::Matrix4f Tiv = Ti.inverse();
 	cout << Tiv << endl;
 	pcl::transformPointCloud(*tgt, *src, Tiv);
-	viewPair(cloud1, cloud2, src, tgt);
+	//viewPair(cloud1, cloud2, src, tgt);
+	pcl::PointCloud<pcl::PointXYZRGB>::Ptr icpout = coloredMerge(tgt, src);
+	pcl::io::savePCDFile("icpout.pcd", *icpout);
 
 	return 0;
 }
