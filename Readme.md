@@ -6,6 +6,6 @@ Developed By VS2013update5 and PCL(Point Cloud Library)
 use program in cmd:
 
 ```
-PointCloudRegistration.exe source.pcd target.pcd
+    >> PointCloudRegistration.exe source.pcd target.pcd
 ```
 
