@@ -47,8 +47,8 @@ int main(int argc, char *argv[]){
 	pcl::PointCloud<pcl::PointXYZ>::Ptr cloud1(new pcl::PointCloud<pcl::PointXYZ>);
 	pcl::PointCloud<pcl::PointXYZ>::Ptr cloud2(new pcl::PointCloud<pcl::PointXYZ>);
 	
-	pcl::io::loadPCDFile("pcd/a1.pcd", *cloud1);
-	pcl::io::loadPCDFile("pcd/a2.pcd", *cloud2);
+	pcl::io::loadPCDFile("pcd/a3.pcd", *cloud1);
+	pcl::io::loadPCDFile("pcd/a4.pcd", *cloud2);
 
 	// downsample the clouds
 	pcl::PointCloud<pcl::PointXYZ>::Ptr cloud1ds(new pcl::PointCloud<pcl::PointXYZ>);
@@ -102,9 +102,9 @@ int main(int argc, char *argv[]){
 	Eigen::Matrix4f Ti = icpNonLinear(points_with_normals_src, points_with_normals_tgt, 2, 2, 0.1);
 	Eigen::Matrix4f Tiv = Ti.inverse();
 	cout << Tiv << endl;
-	pcl::transformPointCloud(*tgt, *src, Tiv);
-	//viewPair(cloud1, cloud2, src, tgt);
-	pcl::PointCloud<pcl::PointXYZRGB>::Ptr icpout = coloredMerge(tgt, src);
+	pcl::transformPointCloud(*tgt, *tgt, Tiv);
+	viewPair(cloud1, cloud2, src, tgt);
+	pcl::PointCloud<pcl::PointXYZRGB>::Ptr icpout = coloredMerge(src, tgt);
 	pcl::io::savePCDFile("icpout.pcd", *icpout);
 
 	return 0;

@@ -41,8 +41,11 @@ public:
 	}
 };
 
-Eigen::Matrix4f icpNonLinear(PointCloud<PointNormal>::Ptr src, PointCloud<PointNormal>::Ptr tgt,
+Eigen::Matrix4f icpNonLinear(PointCloud<PointNormal>::Ptr src_in, PointCloud<PointNormal>::Ptr tgt,
 	int max_iteration, double max_correspondence_distance, double eps){
+
+	PointCloud<PointNormal>::Ptr src(new PointCloud<PointNormal>());
+	pcl::copyPointCloud(*src_in, *src);
 
 	pcl::IterativeClosestPointNonLinear<PointNormal, PointNormal> reg;
 	reg.setTransformationEpsilon(eps);
@@ -69,7 +72,7 @@ Eigen::Matrix4f icpNonLinear(PointCloud<PointNormal>::Ptr src, PointCloud<PointN
 		prev = reg.getLastIncrementalTransformation();
 	}
 
-	Eigen::Matrix4f targetToSource = Ti.inverse();
+	//Eigen::Matrix4f targetToSource = Ti.inverse();
 
 	return Ti;
 }
