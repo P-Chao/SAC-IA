@@ -21,6 +21,8 @@
 #include "pcl/filters/voxel_grid.h" 
 #include "pcl/features/fpfh.h" 
 
+#include <pcl/registration/ndt.h>
+
 #include "filters.h"
 #include "features.h"
 #include "registration.h"
@@ -103,18 +105,31 @@ int main(int argc, char *argv[]){
 	tgt = cloud2;
 
 	// compute normals
-	pcl::PointCloud<pcl::PointNormal>::Ptr points_with_normals_src = getPointNormals(src, 30);
-	pcl::PointCloud<pcl::PointNormal>::Ptr points_with_normals_tgt = getPointNormals(tgt, 30);
+	//pcl::PointCloud<pcl::PointNormal>::Ptr points_with_normals_src = getPointNormals(src, 30);
+	//pcl::PointCloud<pcl::PointNormal>::Ptr points_with_normals_tgt = getPointNormals(tgt, 30);
 
-	// ICP + LM (Non Linear ICP)
-	pcl::IterativeClosestPointNonLinear<pcl::PointNormal, pcl::PointNormal> reg;
-	Eigen::Matrix4f Ti = icpNonLinear(points_with_normals_src, points_with_normals_tgt, 2, 2, 0.1);
-	Eigen::Matrix4f Tiv = Ti.inverse();
-	cout << Tiv << endl;
-	pcl::transformPointCloud(*tgt, *tgt, Tiv);
+	// NDT
+	pcl::NormalDistributionsTransform<pcl::PointXYZ, pcl::PointXYZ> ndt;
+
+	ndt.setTransformationEpsilon(0.1); // 终止条件
+	ndt.setStepSize(10); // more-thuente线搜索最大步长
+
+	ndt.setResolution(10); // ndt 网格分辨率
+	ndt.setMaximumIterations(100);
+	ndt.setInputCloud(src);
+	ndt.setInputTarget(tgt);
+
+	pcl::PointCloud<pcl::PointXYZ>::Ptr reg_result(new pcl::PointCloud<pcl::PointXYZ>);
+	ndt.align(*reg_result);
+
+	std::cout << "Normal Distributions Transform has converged: " << ndt.hasConverged() <<
+		" score: " << ndt.getFitnessScore() << std::endl;
+	std::cout << ndt.getFinalTransformation() << std::endl;
+	pcl::transformPointCloud(*src, *src, ndt.getFinalTransformation());
+
+	pcl::PointCloud<pcl::PointXYZRGB>::Ptr ndtout = coloredMerge(src, tgt);
+	pcl::io::savePCDFile("ndtout.pcd", *ndtout);
 	viewPair(cloud1, cloud2, src, tgt);
-	pcl::PointCloud<pcl::PointXYZRGB>::Ptr icpout = coloredMerge(src, tgt);
-	pcl::io::savePCDFile("icpout.pcd", *icpout);
 
 	return 0;
 }
