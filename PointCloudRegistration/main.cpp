@@ -46,8 +46,8 @@ int main(int argc, char *argv[]){
 		filename1 = argv[1];
 		filename2 = argv[2];
 	} else{
-		filename1 = "pcd/a3.pcd";
-		filename2 = "pcd/a4.pcd";
+		filename1 = "pcd/a1.pcd";
+		filename2 = "pcd/a2.pcd";
 	}
 
 	time_t starttime = time(NULL);
