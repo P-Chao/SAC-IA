@@ -29,6 +29,8 @@
 #include "sac_ia.h"
 #include "visualization.h"
 
+#include "common.h"
+
 using namespace std;
 
 const double FILTER_LIMIT = 1000.0;
@@ -130,6 +132,55 @@ int main(int argc, char *argv[]){
 	pcl::PointCloud<pcl::PointXYZRGB>::Ptr ndtout = coloredMerge(src, tgt);
 	pcl::io::savePCDFile("ndtout.pcd", *ndtout);
 	viewPair(cloud1, cloud2, src, tgt);
+
+	// caculate the centroid position
+	long double cloud1_cx = 0, cloud1_cy = 0, cloud1_cz = 0;
+	long double cloud2_cx = 0, cloud2_cy = 0, cloud2_cz = 0;
+	for (size_t i = 0; i < cloud1->points.size(); ++i){
+		cloud1_cx += cloud1->points[i].x;
+		cloud1_cy += cloud1->points[i].y;
+		cloud1_cz += cloud1->points[i].z;
+	}
+	cloud1_cx /= cloud1->points.size();
+	cloud1_cy /= cloud1->points.size();
+	cloud1_cz /= cloud1->points.size();
+	cout << "Cloud1 Points Count: " << cloud1->points.size() << endl;
+	cout << "Cloud1 Centroid Position: " << cloud1_cx << ", " << cloud1_cy << ", " << cloud1_cz << endl;
+
+	for (size_t i = 0; i < cloud2->points.size(); ++i){
+		cloud2_cx += cloud2->points[i].x;
+		cloud2_cy += cloud2->points[i].y;
+		cloud2_cz += cloud2->points[i].z;
+	}
+	cloud2_cx /= cloud2->points.size();
+	cloud2_cy /= cloud2->points.size();
+	cloud2_cz /= cloud2->points.size();
+	cout << "Cloud2 Points Count: " << cloud2->points.size() << endl;
+	cout << "Cloud2 Centroid Position: " << cloud2_cx << ", " << cloud2_cy << ", " << cloud2_cz << endl;
+
+	long double src_cx = 0, src_cy = 0, src_cz = 0;
+	long double tgt_cx = 0, tgt_cy = 0, tgt_cz = 0;
+	for (size_t i = 0; i < src->points.size(); ++i){
+		src_cx += src->points[i].x;
+		src_cy += src->points[i].y;
+		src_cz += src->points[i].z;
+	}
+	src_cx /= src->points.size();
+	src_cy /= src->points.size();
+	src_cz /= src->points.size();
+	cout << "Src PC Points Count: " << src->points.size() << endl;
+	cout << "Src PC Centroid Position: " << src_cx << ", " << src_cy << ", " << src_cz << endl;
+
+	for (size_t i = 0; i < tgt->points.size(); ++i){
+		tgt_cx += tgt->points[i].x;
+		tgt_cy += tgt->points[i].y;
+		tgt_cz += tgt->points[i].z;
+	}
+	tgt_cx /= tgt->points.size();
+	tgt_cy /= tgt->points.size();
+	tgt_cz /= tgt->points.size();
+	cout << "Tgt PC Points Count: " << tgt->points.size() << endl;
+	cout << "Tgt PC Centroid Position: " << tgt_cx << ", " << tgt_cy << ", " << tgt_cz << endl;
 
 	return 0;
 }
