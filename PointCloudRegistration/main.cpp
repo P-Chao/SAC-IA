@@ -21,11 +21,15 @@
 #include "pcl/filters/voxel_grid.h" 
 #include "pcl/features/fpfh.h" 
 
+#include <pcl/registration/ndt.h>
+
 #include "filters.h"
 #include "features.h"
 #include "registration.h"
 #include "sac_ia.h"
 #include "visualization.h"
+
+#include "common.h"
 
 using namespace std;
 
@@ -44,8 +48,8 @@ int main(int argc, char *argv[]){
 		filename1 = argv[1];
 		filename2 = argv[2];
 	} else{
-		filename1 = "pcd/a3.pcd";
-		filename2 = "pcd/a4.pcd";
+		filename1 = "pcd/a1.pcd";
+		filename2 = "pcd/a2.pcd";
 	}
 
 	time_t starttime = time(NULL);
@@ -103,18 +107,80 @@ int main(int argc, char *argv[]){
 	tgt = cloud2;
 
 	// compute normals
-	pcl::PointCloud<pcl::PointNormal>::Ptr points_with_normals_src = getPointNormals(src, 30);
-	pcl::PointCloud<pcl::PointNormal>::Ptr points_with_normals_tgt = getPointNormals(tgt, 30);
+	//pcl::PointCloud<pcl::PointNormal>::Ptr points_with_normals_src = getPointNormals(src, 30);
+	//pcl::PointCloud<pcl::PointNormal>::Ptr points_with_normals_tgt = getPointNormals(tgt, 30);
 
-	// ICP + LM (Non Linear ICP)
-	pcl::IterativeClosestPointNonLinear<pcl::PointNormal, pcl::PointNormal> reg;
-	Eigen::Matrix4f Ti = icpNonLinear(points_with_normals_src, points_with_normals_tgt, 2, 2, 0.1);
-	Eigen::Matrix4f Tiv = Ti.inverse();
-	cout << Tiv << endl;
-	pcl::transformPointCloud(*tgt, *tgt, Tiv);
+	// NDT
+	pcl::NormalDistributionsTransform<pcl::PointXYZ, pcl::PointXYZ> ndt;
+
+	ndt.setTransformationEpsilon(0.1); // 终止条件
+	ndt.setStepSize(10); // more-thuente线搜索最大步长
+
+	ndt.setResolution(10); // ndt 网格分辨率
+	ndt.setMaximumIterations(100);
+	ndt.setInputCloud(src);
+	ndt.setInputTarget(tgt);
+
+	pcl::PointCloud<pcl::PointXYZ>::Ptr reg_result(new pcl::PointCloud<pcl::PointXYZ>);
+	ndt.align(*reg_result);
+
+	std::cout << "Normal Distributions Transform has converged: " << ndt.hasConverged() <<
+		" score: " << ndt.getFitnessScore() << std::endl;
+	std::cout << ndt.getFinalTransformation() << std::endl;
+	pcl::transformPointCloud(*src, *src, ndt.getFinalTransformation());
+
+	pcl::PointCloud<pcl::PointXYZRGB>::Ptr ndtout = coloredMerge(src, tgt);
+	pcl::io::savePCDFile("ndtout.pcd", *ndtout);
 	viewPair(cloud1, cloud2, src, tgt);
-	pcl::PointCloud<pcl::PointXYZRGB>::Ptr icpout = coloredMerge(src, tgt);
-	pcl::io::savePCDFile("icpout.pcd", *icpout);
+
+	// caculate the centroid position
+	long double cloud1_cx = 0, cloud1_cy = 0, cloud1_cz = 0;
+	long double cloud2_cx = 0, cloud2_cy = 0, cloud2_cz = 0;
+	for (size_t i = 0; i < cloud1->points.size(); ++i){
+		cloud1_cx += cloud1->points[i].x;
+		cloud1_cy += cloud1->points[i].y;
+		cloud1_cz += cloud1->points[i].z;
+	}
+	cloud1_cx /= cloud1->points.size();
+	cloud1_cy /= cloud1->points.size();
+	cloud1_cz /= cloud1->points.size();
+	cout << "Cloud1 Points Count: " << cloud1->points.size() << endl;
+	cout << "Cloud1 Centroid Position: " << cloud1_cx << ", " << cloud1_cy << ", " << cloud1_cz << endl;
+
+	for (size_t i = 0; i < cloud2->points.size(); ++i){
+		cloud2_cx += cloud2->points[i].x;
+		cloud2_cy += cloud2->points[i].y;
+		cloud2_cz += cloud2->points[i].z;
+	}
+	cloud2_cx /= cloud2->points.size();
+	cloud2_cy /= cloud2->points.size();
+	cloud2_cz /= cloud2->points.size();
+	cout << "Cloud2 Points Count: " << cloud2->points.size() << endl;
+	cout << "Cloud2 Centroid Position: " << cloud2_cx << ", " << cloud2_cy << ", " << cloud2_cz << endl;
+
+	long double src_cx = 0, src_cy = 0, src_cz = 0;
+	long double tgt_cx = 0, tgt_cy = 0, tgt_cz = 0;
+	for (size_t i = 0; i < src->points.size(); ++i){
+		src_cx += src->points[i].x;
+		src_cy += src->points[i].y;
+		src_cz += src->points[i].z;
+	}
+	src_cx /= src->points.size();
+	src_cy /= src->points.size();
+	src_cz /= src->points.size();
+	cout << "Src PC Points Count: " << src->points.size() << endl;
+	cout << "Src PC Centroid Position: " << src_cx << ", " << src_cy << ", " << src_cz << endl;
+
+	for (size_t i = 0; i < tgt->points.size(); ++i){
+		tgt_cx += tgt->points[i].x;
+		tgt_cy += tgt->points[i].y;
+		tgt_cz += tgt->points[i].z;
+	}
+	tgt_cx /= tgt->points.size();
+	tgt_cy /= tgt->points.size();
+	tgt_cz /= tgt->points.size();
+	cout << "Tgt PC Points Count: " << tgt->points.size() << endl;
+	cout << "Tgt PC Centroid Position: " << tgt_cx << ", " << tgt_cy << ", " << tgt_cz << endl;
 
 	return 0;
 }
