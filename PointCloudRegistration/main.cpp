@@ -52,7 +52,7 @@ int main(int argc, char *argv[]){
 		filename2 = "pcd/a2.pcd";
 	}
 
-	time_t starttime = time(NULL);
+	Timer t;
 	cout << "Loading clouds...\n";
 	cout.flush();
 
@@ -63,6 +63,31 @@ int main(int argc, char *argv[]){
 	pcl::io::loadPCDFile(filename1, *cloud1);
 	pcl::io::loadPCDFile(filename2, *cloud2);
 
+	long double cloud1ia_cx = 0, cloud1ia_cy = 0, cloud1ia_cz = 0;
+	long double cloud2ia_cx = 0, cloud2ia_cy = 0, cloud2ia_cz = 0;
+	for (size_t i = 0; i < cloud1->points.size(); ++i){
+		cloud1ia_cx += cloud1->points[i].x;
+		cloud1ia_cy += cloud1->points[i].y;
+		cloud1ia_cz += cloud1->points[i].z;
+	}
+	cloud1ia_cx /= cloud1->points.size();
+	cloud1ia_cy /= cloud1->points.size();
+	cloud1ia_cz /= cloud1->points.size();
+	cout << "Cloud1 Init Points Count: " << cloud1->points.size() << endl;
+	cout << "Cloud1 Init Centroid Position: " << cloud1ia_cx << ", " << cloud1ia_cy << ", " << cloud1ia_cz << endl;
+
+	for (size_t i = 0; i < cloud2->points.size(); ++i){
+		cloud2ia_cx += cloud2->points[i].x;
+		cloud2ia_cy += cloud2->points[i].y;
+		cloud2ia_cz += cloud2->points[i].z;
+	}
+	cloud2ia_cx /= cloud2->points.size();
+	cloud2ia_cy /= cloud2->points.size();
+	cloud2ia_cz /= cloud2->points.size();
+	cout << "Cloud2 Init Points Count: " << cloud2->points.size() << endl;
+	cout << "Cloud2 Init Centroid Position: " << cloud2ia_cx << ", " << cloud2ia_cy << ", " << cloud2ia_cz << endl;
+
+	t.StartWatchTimer();
 	// downsample the clouds
 	pcl::PointCloud<pcl::PointXYZ>::Ptr cloud1ds(new pcl::PointCloud<pcl::PointXYZ>);
 	pcl::PointCloud<pcl::PointXYZ>::Ptr cloud2ds(new pcl::PointCloud<pcl::PointXYZ>);
@@ -87,9 +112,34 @@ int main(int argc, char *argv[]){
 	pcl::PointCloud<pcl::PointXYZ> final = *cloud1;
 	final += *cloud2;
 
+	t.ReadWatchTimer();
+	cout << "IA Time: " << t << "ms " << endl;
 	cout << init_transform << endl;
-	cout << "done. Time elapsed: " << time(NULL) - starttime << " seconds\n";
 	cout.flush();
+
+	long double cloud1_cx = 0, cloud1_cy = 0, cloud1_cz = 0;
+	long double cloud2_cx = 0, cloud2_cy = 0, cloud2_cz = 0;
+	for (size_t i = 0; i < cloud1->points.size(); ++i){
+		cloud1_cx += cloud1->points[i].x;
+		cloud1_cy += cloud1->points[i].y;
+		cloud1_cz += cloud1->points[i].z;
+	}
+	cloud1_cx /= cloud1->points.size();
+	cloud1_cy /= cloud1->points.size();
+	cloud1_cz /= cloud1->points.size();
+	cout << "Cloud1 IA Points Count: " << cloud1->points.size() << endl;
+	cout << "Cloud1 IA Centroid Position: " << cloud1_cx << ", " << cloud1_cy << ", " << cloud1_cz << endl;
+
+	for (size_t i = 0; i < cloud2->points.size(); ++i){
+		cloud2_cx += cloud2->points[i].x;
+		cloud2_cy += cloud2->points[i].y;
+		cloud2_cz += cloud2->points[i].z;
+	}
+	cloud2_cx /= cloud2->points.size();
+	cloud2_cy /= cloud2->points.size();
+	cloud2_cz /= cloud2->points.size();
+	cout << "Cloud2 IA Points Count: " << cloud2->points.size() << endl;
+	cout << "Cloud2 IA Centroid Position: " << cloud2_cx << ", " << cloud2_cy << ", " << cloud2_cz << endl;
 
 	pcl::io::savePCDFile("result.pcd", final);
 	viewPair(cloud1ds, cloud2ds, cloud1, cloud2);
@@ -111,6 +161,7 @@ int main(int argc, char *argv[]){
 	//pcl::PointCloud<pcl::PointNormal>::Ptr points_with_normals_tgt = getPointNormals(tgt, 30);
 
 	// NDT
+	t.StartWatchTimer();
 	pcl::NormalDistributionsTransform<pcl::PointXYZ, pcl::PointXYZ> ndt;
 
 	ndt.setTransformationEpsilon(0.1); // ÖÕÖ¹Ìõ¼þ
@@ -129,35 +180,14 @@ int main(int argc, char *argv[]){
 	std::cout << ndt.getFinalTransformation() << std::endl;
 	pcl::transformPointCloud(*src, *src, ndt.getFinalTransformation());
 
+	t.ReadWatchTimer();
+	cout << "NDT Time: " << t << "ms " << endl;
+
 	pcl::PointCloud<pcl::PointXYZRGB>::Ptr ndtout = coloredMerge(src, tgt);
 	pcl::io::savePCDFile("ndtout.pcd", *ndtout);
 	viewPair(cloud1, cloud2, src, tgt);
 
 	// caculate the centroid position
-	long double cloud1_cx = 0, cloud1_cy = 0, cloud1_cz = 0;
-	long double cloud2_cx = 0, cloud2_cy = 0, cloud2_cz = 0;
-	for (size_t i = 0; i < cloud1->points.size(); ++i){
-		cloud1_cx += cloud1->points[i].x;
-		cloud1_cy += cloud1->points[i].y;
-		cloud1_cz += cloud1->points[i].z;
-	}
-	cloud1_cx /= cloud1->points.size();
-	cloud1_cy /= cloud1->points.size();
-	cloud1_cz /= cloud1->points.size();
-	cout << "Cloud1 Points Count: " << cloud1->points.size() << endl;
-	cout << "Cloud1 Centroid Position: " << cloud1_cx << ", " << cloud1_cy << ", " << cloud1_cz << endl;
-
-	for (size_t i = 0; i < cloud2->points.size(); ++i){
-		cloud2_cx += cloud2->points[i].x;
-		cloud2_cy += cloud2->points[i].y;
-		cloud2_cz += cloud2->points[i].z;
-	}
-	cloud2_cx /= cloud2->points.size();
-	cloud2_cy /= cloud2->points.size();
-	cloud2_cz /= cloud2->points.size();
-	cout << "Cloud2 Points Count: " << cloud2->points.size() << endl;
-	cout << "Cloud2 Centroid Position: " << cloud2_cx << ", " << cloud2_cy << ", " << cloud2_cz << endl;
-
 	long double src_cx = 0, src_cy = 0, src_cz = 0;
 	long double tgt_cx = 0, tgt_cy = 0, tgt_cz = 0;
 	for (size_t i = 0; i < src->points.size(); ++i){
@@ -181,6 +211,8 @@ int main(int argc, char *argv[]){
 	tgt_cz /= tgt->points.size();
 	cout << "Tgt PC Points Count: " << tgt->points.size() << endl;
 	cout << "Tgt PC Centroid Position: " << tgt_cx << ", " << tgt_cy << ", " << tgt_cz << endl;
+
+	system("pause");
 
 	return 0;
 }
