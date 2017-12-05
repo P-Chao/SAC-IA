@@ -212,7 +212,7 @@ int main(int argc, char *argv[]){
 	cout << "Tgt PC Points Count: " << tgt->points.size() << endl;
 	cout << "Tgt PC Centroid Position: " << tgt_cx << ", " << tgt_cy << ", " << tgt_cz << endl;
 
-	system("pause");
+	//system("pause");
 
 	return 0;
 }
