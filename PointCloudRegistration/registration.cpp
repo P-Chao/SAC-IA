@@ -73,6 +73,7 @@ Eigen::Matrix4f icpNonLinear(PointCloud<PointNormal>::Ptr src_in, PointCloud<Poi
 	}
 
 	//Eigen::Matrix4f targetToSource = Ti.inverse();
+	std::cout << "ICP Fitness Score: " << reg.getFitnessScore() << std::endl;
 
 	return Ti;
 }
