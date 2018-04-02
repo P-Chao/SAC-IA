@@ -175,10 +175,12 @@ int main(int argc, char *argv[]){
 	pcl::PointCloud<pcl::PointXYZ>::Ptr reg_result(new pcl::PointCloud<pcl::PointXYZ>);
 	ndt.align(*reg_result);
 
+	Eigen::Matrix4f Ti = ndt.getFinalTransformation();
+	Eigen::Matrix4f Tiv = Ti.inverse();
 	std::cout << "Normal Distributions Transform has converged: " << ndt.hasConverged() <<
 		" score: " << ndt.getFitnessScore() << std::endl;
-	std::cout << ndt.getFinalTransformation() << std::endl;
-	pcl::transformPointCloud(*src, *src, ndt.getFinalTransformation());
+	std::cout << Tiv << std::endl;
+	pcl::transformPointCloud(*tgt, *tgt, Tiv);
 
 	t.ReadWatchTimer();
 	cout << "NDT Time: " << t << "ms " << endl;
