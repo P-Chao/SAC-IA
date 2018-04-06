@@ -1,6 +1,12 @@
 #pragma once
 
 #include <Windows.h>
+#include <iostream>
+#include <vector>
+#include <Eigen/Core>
+
+std::vector<float> computeEularAngles(Eigen::Matrix4f& R, bool israd = true);
+
 
 class Timer{
 public:

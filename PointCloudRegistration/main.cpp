@@ -112,9 +112,13 @@ int main(int argc, char *argv[]){
 	pcl::PointCloud<pcl::PointXYZ> final = *cloud1;
 	final += *cloud2;
 
+	// compute eular angle
+	vector<float> angles = computeEularAngles(init_transform, false);
+
 	t.ReadWatchTimer();
 	cout << "IA Time: " << t << "ms " << endl;
 	cout << init_transform << endl;
+	cout << "angle: " << angles[0] << ", " << angles[1] << ", " << angles[2] << std::endl;
 	cout.flush();
 
 	long double cloud1_cx = 0, cloud1_cy = 0, cloud1_cz = 0;
@@ -177,9 +181,11 @@ int main(int argc, char *argv[]){
 
 	Eigen::Matrix4f Ti = ndt.getFinalTransformation();
 	Eigen::Matrix4f Tiv = Ti.inverse();
+	vector<float> ndt_angles = computeEularAngles(Tiv, false);
 	std::cout << "Normal Distributions Transform has converged: " << ndt.hasConverged() <<
 		" score: " << ndt.getFitnessScore() << std::endl;
 	std::cout << Tiv << std::endl;
+	std::cout << "NDT angle: " << ndt_angles[0] << ", " << ndt_angles[1] << ", " << ndt_angles[2] << std::endl;
 	pcl::transformPointCloud(*tgt, *tgt, Tiv);
 
 	t.ReadWatchTimer();
